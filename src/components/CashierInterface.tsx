@@ -67,23 +67,19 @@ const CashierInterface: React.FC = () => {
 
   const handleCashPayment = () => {
     const cashAmountNum = parseFloat(cashAmount);
-    if (cashAmountNum >= totalAmount) {
-      const change = cashAmountNum - totalAmount;
-      setChangeDue(change);
-      const transactionId = checkout('Cash');
-      setLastSale({
-        items: [...basket],
-        total: totalAmount,
-        paymentMethod: 'Cash',
-        amountPaid: cashAmountNum,
-        transactionId,
-      });
-      setShowPaymentModal(false);
-      setReceiptVisible(true);
-      setCashAmount('');
-    } else {
-      alert('Insufficient cash amount');
-    }
+    const change = cashAmountNum > totalAmount ? cashAmountNum - totalAmount : 0;
+    setChangeDue(change);
+    const transactionId = checkout('Cash');
+    setLastSale({
+      items: [...basket],
+      total: totalAmount,
+      paymentMethod: 'Cash',
+      amountPaid: cashAmountNum || totalAmount,
+      transactionId,
+    });
+    setShowPaymentModal(false);
+    setReceiptVisible(true);
+    setCashAmount('');
   };
 
   const handleCardPayment = () => {
@@ -264,7 +260,7 @@ const CashierInterface: React.FC = () => {
             <div className="mb-4">
               <input
                 type="number"
-                placeholder="Cash amount"
+                placeholder="Cash amount (optional)"
                 value={cashAmount}
                 onChange={(e) => setCashAmount(e.target.value)}
                 className="w-full p-2 border rounded"
@@ -315,7 +311,9 @@ const CashierInterface: React.FC = () => {
             {lastSale.paymentMethod === 'Cash' && (
               <>
                 <p>Amount Paid: {currency}{lastSale.amountPaid.toFixed(2)}</p>
-                <p>Change: {currency}{(lastSale.amountPaid - lastSale.total).toFixed(2)}</p>
+                {lastSale.amountPaid > lastSale.total && (
+                  <p>Change: {currency}{(lastSale.amountPaid - lastSale.total).toFixed(2)}</p>
+                )}
               </>
             )}
             <button
